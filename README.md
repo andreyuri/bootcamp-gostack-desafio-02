@@ -1,6 +1,6 @@
-# bootcamp-gostack-desafio-02
+# FastFeet
 
-Desafio 2 do bootcamp GoStack da Rocketseat.
+Desafio back-end do bootcamp GoStack da Rocketseat
 
 ### Objetivo
 
