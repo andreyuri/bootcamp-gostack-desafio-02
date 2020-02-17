@@ -3,6 +3,8 @@ import Deliverie from '../models/Deliverie';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
 import File from '../models/File';
+import DeliverieMail from '../jobs/DeliverieMail';
+import Queue from '../../lib/Queue';
 
 class DeliverieController {
   async store(req, res) {
@@ -16,6 +18,16 @@ class DeliverieController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
+    const recipient = await Recipient.findByPk(req.body.recipient_id);
+    if (!recipient) {
+      return res.status(400).json({ error: 'Recipient does not exists' });
+    }
+
+    const deliveryman = await Deliveryman.findByPk(req.body.deliveryman_id);
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman does not exists' });
+    }
+
     const {
       id,
       product,
@@ -23,7 +35,11 @@ class DeliverieController {
       deliveryman_id,
     } = await Deliverie.create(req.body);
 
-    // TODO enviar e-mail ao entregador (deliveryman)
+    await Queue.add(DeliverieMail.key, {
+      deliveryman,
+      recipient,
+      product,
+    });
 
     return res.json({
       id,
@@ -63,6 +79,27 @@ class DeliverieController {
     });
 
     return res.json(deliveries);
+  }
+
+  async update(req, res) {
+    return res.json();
+  }
+
+  async delete(req, res) {
+    const deliverie = await Deliverie.findByPk(req.params.id);
+    if (!deliverie) {
+      return res.status(400).json({ error: 'Invalid deliverie' });
+    }
+
+    if (deliverie.canceled_at) {
+      return res.status(400).json({ error: 'Delivery already canceled' });
+    }
+
+    deliverie.canceled_at = new Date();
+
+    await deliverie.save();
+
+    return res.json(deliverie);
   }
 }
 
