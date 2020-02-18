@@ -6,7 +6,7 @@ import File from '../models/File';
 import DeliverieMail from '../jobs/DeliverieMail';
 import Queue from '../../lib/Queue';
 
-class DeliverieController {
+class DeliveryController {
   async store(req, res) {
     const schema = Yup.object().shape({
       recipient_id: Yup.number().required(),
@@ -82,7 +82,36 @@ class DeliverieController {
   }
 
   async update(req, res) {
-    return res.json();
+    const schema = Yup.object().shape({
+      recipient_id: Yup.number(),
+      deliveryman_id: Yup.number(),
+      product: Yup.string(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validations fails' });
+    }
+
+    const { recipient_id, deliveryman_id } = req.body;
+
+    const recipient = await Recipient.findByPk(recipient_id);
+    if (!recipient) {
+      return res.status(400).json({ error: 'Recipient does not exists' });
+    }
+
+    const deliveryman = await Deliveryman.findByPk(deliveryman_id);
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman does not exists' });
+    }
+
+    const deliverie = await Deliverie.findByPk(req.params.id);
+    if (!deliverie) {
+      return res.status(400).json({ error: 'Deliverie does not exists' });
+    }
+
+    await deliverie.update(req.body);
+
+    return res.json(deliverie);
   }
 
   async delete(req, res) {
@@ -103,4 +132,4 @@ class DeliverieController {
   }
 }
 
-export default new DeliverieController();
+export default new DeliveryController();
