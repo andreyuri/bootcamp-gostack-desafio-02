@@ -22,7 +22,7 @@ routes.post('/sessions', SessionController.store);
 
 routes.get('/deliverymans/:id/deliveries', DeliveryManagementController.index);
 routes.put(
-  '/deliverymans/:deliverymanId/deliveries/withdrawals/:deliveryId',
+  '/deliverymans/:deliverymanId/deliveries/:deliveryId/withdrawals',
   DeliveryWithdrawalsController.update
 );
 
