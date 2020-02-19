@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+  database:
+    image: postgres
+    container_name: database
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=docker
+  mongobarber:
+    image: mongo
+    container_name: mongobarber
+    ports:
+      - "27017:27017"
+  redisbarber:
+    image: "redis:alpine"
+    container_name: redisbarber
+    ports:
+      - "6379:6379"
