@@ -7,22 +7,37 @@ import {
   isAfter,
   setMinutes,
   setSeconds,
+  parseISO,
 } from 'date-fns';
+import * as Yup from 'yup';
 import Deliverie from '../models/Deliverie';
 
 class DeliveryWithdrawalsController {
   async update(req, res) {
+    const schema = Yup.object().shape({
+      start_date: Yup.date().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    const { start_date } = req.body;
+    const startDateFormatted = parseISO(start_date);
+
     const startHourAllowed = setSeconds(
-      setMinutes(setHours(new Date(), 8), 0),
+      setMinutes(setHours(startDateFormatted, 8), 0),
       0
     );
     const endHourAllowed = setSeconds(
-      setMinutes(setHours(new Date(), 18), 0),
+      setMinutes(setHours(startDateFormatted, 18), 0),
       0
     );
-    const now = new Date(2020, 1, 18, 10, 21);
 
-    if (isBefore(now, startHourAllowed) || isAfter(now, endHourAllowed)) {
+    if (
+      isBefore(startDateFormatted, startHourAllowed) ||
+      isAfter(startDateFormatted, endHourAllowed)
+    ) {
       return res.status(400).json({
         error: 'Deliveries can be withdrawal between 08:00 and 18:00',
       });
@@ -33,7 +48,10 @@ class DeliveryWithdrawalsController {
     const checkDeliveries = await Deliverie.findAll({
       where: {
         start_date: {
-          [Op.between]: [startOfDay(now), endOfDay(now)],
+          [Op.between]: [
+            startOfDay(startDateFormatted),
+            endOfDay(startDateFormatted),
+          ],
         },
         deliveryman_id: deliverymanId,
       },
@@ -61,7 +79,7 @@ class DeliveryWithdrawalsController {
     }
 
     await delivery.update({
-      start_date: new Date(),
+      start_date: startDateFormatted,
     });
 
     return res.json(delivery);
