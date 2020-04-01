@@ -1,4 +1,6 @@
 import * as Yup from 'yup';
+import { Op } from 'sequelize';
+
 import Recipient from '../models/Recipient';
 
 class RecipientController {
@@ -82,6 +84,27 @@ class RecipientController {
       city,
       postal_code,
     });
+  }
+
+  async index(req, res) {
+    const { q } = req.query;
+
+    const recipients = await Recipient.findAll({
+      attributes: [
+        'id',
+        'name',
+        'street',
+        'number',
+        'state',
+        'city',
+        'postal_code',
+      ],
+      where: {
+        name: q ? { [Op.iLike]: `%${q}%` } : { [Op.ne]: null },
+      },
+    });
+
+    return res.json(recipients);
   }
 }
 
