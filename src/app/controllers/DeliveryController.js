@@ -59,6 +59,7 @@ class DeliveryController {
         canceled_at: null,
         product: q ? { [Op.iLike]: `%${q}%` } : { [Op.ne]: null },
       },
+      order: [['id', 'ASC']],
       attributes: ['id', 'product', 'canceled_at', 'start_date', 'end_date'],
       limit: 20,
       offset: (page - 1) * 20,
@@ -66,7 +67,7 @@ class DeliveryController {
         {
           model: Recipient,
           as: 'recipient',
-          attributes: ['id', 'name', 'postal_code'],
+          attributes: ['id', 'name', 'city', 'postal_code'],
         },
         {
           model: Deliveryman,
