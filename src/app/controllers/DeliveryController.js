@@ -82,6 +82,22 @@ class DeliveryController {
       ],
     });
 
+    deliveries.forEach(d => {
+      if (d.signature) {
+        d.status = 'Entregue';
+      } else if (d.canceled_at) {
+        d.status = 'Cancelado';
+      } else if (d.start_date) {
+        d.status = 'Retirada';
+      } else {
+        d.status = 'Pendente';
+      }
+
+      d.color = `#${Math.random()
+        .toString(16)
+        .slice(2, 8)}`;
+    });
+
     return res.json(deliveries);
   }
 
